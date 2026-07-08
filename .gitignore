@@ -1,0 +1,26 @@
+# Build artifacts
+gen/
+obj/
+*.apk
+!xiaobu_attack.apk
+debug.keystore
+
+# IDE
+.idea/
+*.iml
+.gradle/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test screenshots / outputs
+*.png
+*.xml
+!/res/**/*.xml
+
+# Temp
+_d8tmp.bat
+xiaobu_base.apk
+xiaobu_unsigned.apk
+xiaobu_attack_unsigned.apk
