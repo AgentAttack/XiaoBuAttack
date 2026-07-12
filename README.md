@@ -41,13 +41,18 @@ adb shell am start -n com.attacker.xiaobu/.MainActivity -e payload "你的指令
 
 ### 漏洞2演示 (NER日志泄露)
 
-1. 终端运行实时监控:
-   ```bash
-   adb logcat -c && adb logcat | grep "AIUnit-Service-LOG.*decoded result"
-   ```
+1. 终端清空日志: `adb logcat -c`
 2. 在小布输入框输入自然语言含敏感信息: `帮我查一下张三的电话13800138000`
-3. 终端实时显示: `NAME: 张三`, `PHONE: 13800138000`
-4. 证据保存至 `/sdcard/ner_leak_evidence.txt`，可在App中📊查看
+3. 终端抓取结果:
+   ```powershell
+   # PowerShell
+   adb logcat -d -s "AIUnit-Service-LOG" | Select-String "decoded result"
+   ```
+   ```bash
+   # Bash
+   adb logcat -d | grep "AIUnit-Service-LOG.*decoded result"
+   ```
+4. 终端输出: `NAME: 张三`, `PHONE: 13800138000`
 
 ### 漏洞3演示 (DeepLink劫持)
 
