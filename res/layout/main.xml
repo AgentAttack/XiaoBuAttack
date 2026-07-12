@@ -25,9 +25,14 @@
         android:text="2. 查看通话记录" android:textSize="15sp"
         android:layout_marginBottom="16dp" />
 
-    <Button android:id="@+id/btn_call"
+    <Button android:id="@+id/btn_sms"
         android:layout_width="260dp" android:layout_height="56dp"
-        android:text="3. 拨打 19179193039" android:textSize="15sp"
+        android:text="3. 发短信：你好" android:textSize="15sp"
+        android:layout_marginBottom="16dp" />
+
+    <Button android:id="@+id/btn_wechat"
+        android:layout_width="260dp" android:layout_height="56dp"
+        android:text="4. 发微信：你好" android:textSize="15sp"
         android:layout_marginBottom="16dp" />
 
     <Button android:id="@+id/btn_result"

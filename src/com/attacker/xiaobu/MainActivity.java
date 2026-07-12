@@ -19,7 +19,8 @@ public class MainActivity extends Activity {
 
         findViewById(R.id.btn_alipay).setOnClickListener(v -> go("打开支付宝付款码"));
         findViewById(R.id.btn_calllog).setOnClickListener(v -> go("帮我查一下最近的通话记录"));
-        findViewById(R.id.btn_call).setOnClickListener(v -> go("给19179193039打个电话"));
+        findViewById(R.id.btn_sms).setOnClickListener(v -> go("请给19179193039用sim2发送信息：你好"));
+        findViewById(R.id.btn_wechat).setOnClickListener(v -> go("请给郑元劢发微信：你好"));
         findViewById(R.id.btn_result).setOnClickListener(v ->
             startActivity(new Intent(this, ResultViewerActivity.class)));
     }
