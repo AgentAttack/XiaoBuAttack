@@ -67,7 +67,7 @@ $genFiles = Get-ChildItem -Recurse "$GEN\*.java" | ForEach-Object { $_.FullName 
 $allFiles = @($srcFiles) + @($genFiles)
 
 & $JAVAC -source 11 -target 11 `
-    -bootclasspath $PLATFORM `
+    -cp $PLATFORM `
     -d $OBJ `
     -Xlint:none `
     $allFiles 2>&1
