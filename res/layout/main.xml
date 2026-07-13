@@ -5,39 +5,36 @@
     android:gravity="center"
     android:orientation="vertical"
     android:background="#ffffff"
-    android:padding="30dp">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:textSize="22sp"
-        android:textColor="#333333"
-        android:layout_marginBottom="40dp" />
-
-    <Button android:id="@+id/btn_alipay"
-        android:layout_width="260dp" android:layout_height="56dp"
-        android:text="1. 打开支付宝付款码" android:textSize="15sp"
-        android:layout_marginBottom="16dp" />
-
-    <Button android:id="@+id/btn_calllog"
-        android:layout_width="260dp" android:layout_height="56dp"
-        android:text="2. 查看通话记录" android:textSize="15sp"
-        android:layout_marginBottom="16dp" />
+    android:padding="20dp">
 
     <Button android:id="@+id/btn_sms"
-        android:layout_width="260dp" android:layout_height="56dp"
-        android:text="3. 发短信：你好" android:textSize="15sp"
-        android:layout_marginBottom="16dp" />
+        android:layout_width="260dp" android:layout_height="50dp"
+        android:text="1. 发送短信" android:textSize="14sp"
+        android:layout_marginBottom="12dp" />
 
     <Button android:id="@+id/btn_wechat"
-        android:layout_width="260dp" android:layout_height="56dp"
-        android:text="4. 发微信：你好" android:textSize="15sp"
-        android:layout_marginBottom="16dp" />
+        android:layout_width="260dp" android:layout_height="50dp"
+        android:text="2. 发送微信" android:textSize="14sp"
+        android:layout_marginBottom="12dp" />
+
+    <Button android:id="@+id/btn_install"
+        android:layout_width="260dp" android:layout_height="50dp"
+        android:text="3. 安装应用" android:textSize="14sp"
+        android:layout_marginBottom="12dp" />
+
+    <Button android:id="@+id/btn_call"
+        android:layout_width="260dp" android:layout_height="50dp"
+        android:text="4. 拨打电话" android:textSize="14sp"
+        android:layout_marginBottom="12dp" />
+
+    <Button android:id="@+id/btn_gallery"
+        android:layout_width="260dp" android:layout_height="50dp"
+        android:text="5. 窃取隐私" android:textSize="14sp"
+        android:layout_marginBottom="12dp" />
 
     <Button android:id="@+id/btn_result"
-        android:layout_width="260dp" android:layout_height="56dp"
-        android:text="📊 查看窃取结果" android:textSize="15sp"
-        android:layout_marginBottom="16dp" />
+        android:layout_width="260dp" android:layout_height="50dp"
+        android:text="📊 查看窃取结果" android:textSize="14sp"
+        android:layout_marginBottom="12dp" />
 
 </LinearLayout>

